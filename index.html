@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Anoma Intent Forge — Upgraded</title>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+  :root{
+    --bg-dark: linear-gradient(135deg,#1a0000 0%,#330000 50%,#000000 100%);
+    --bg-light: linear-gradient(135deg,#fff5f5 0%,#ffe0e0 50%,#ffffff 100%);
+    --card-bg-dark: rgba(255,255,255,0.04);
+    --card-bg-light: rgba(255,0,0,0.04);
+    --accent1: #ff0000;
+    --accent2: #ff6b6b;
+    --muted-dark: rgba(255,255,255,0.75);
+    --muted-light: rgba(0,0,0,0.65);
+    --text-dark: #ffffff;
+    --text-light: #0b0b0b;
+    --glass-border-dark: rgba(255,0,0,0.08);
+    --glass-border-light: rgba(255,0,0,0.12);
+    --success: #28a745;
+    --info: #007bff;
+    --warning: #ffc107;
+  }
+
+  /* Global resets */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-dark);
+    --text: var(--text-dark);
+    transition: background 0.25s ease, color 0.25s ease;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  /* Light mode flips the palette */
+  body.light-mode{
+    background: var(--bg-light);
+    color: var(--text-light);
+    --text: var(--text-light);
+  }
+
+  .container{max-width:1200px;margin:0 auto;padding:20px}
+  /* header */
+  .header{background:rgba(255,255,255,0.02);backdrop-filter:blur(6px);border-bottom:1px solid var(--glass-border-dark);position:sticky;top:0;z-index:1000}
+  body.light-mode .header{border-bottom:1px solid var(--glass-border-light)}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:12px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo-img{width:50px;height:50px;border-radius:6px;background:transparent;display:inline-block;flex-shrink:0}
+  .title {font-weight:700;font-size:1.1rem;color:var(--text);display:flex;gap:8px;align-items:center}
+  .tagline{font-size:0.9rem;color:var(--muted-dark)}
+  body.light-mode .tagline{color:var(--muted-light)}
+  .nav-links{display:flex;gap:18px;align-items:center;list-style:none}
+  .nav-links a{color:var(--text);text-decoration:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:all .18s}
+  .nav-links a.active{background:linear-gradient(45deg,var(--accent1),var(--accent2));color:#fff;box-shadow:0 6px 18px rgba(255,0,0,0.18)}
+  .theme-toggle{background:linear-gradient(45deg,var(--accent1),var(--accent2));border:0;color:#fff;padding:8px 12px;border-radius:24px;cursor:pointer}
+  .mobile-menu{display:none;flex-direction:column;gap:6px;cursor:pointer}
+  .mobile-menu span{width:28px;height:3px;background:linear-gradient(45deg,var(--accent1),var(--accent2));display:block;border-radius:2px}
+
+  /* hero */
+  .hero img{ width:48px;height:48px;vertical-align:middle;margin-right:8px }
+  .hero{text-align:center;padding:44px 0;background:radial-gradient(circle at center,rgba(255,0,0,0.06) 0%,transparent 70%)}
+  .hero h1{font-size:2.6rem;margin-bottom:8px;background:linear-gradient(45deg,var(--accent1),var(--accent2),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 2s ease-in-out infinite alternate}
+  @keyframes glow {from {filter:drop-shadow(0 0 14px rgba(255,0,0,0.45))} to {filter:drop-shadow(0 0 26px rgba(255,0,0,0.75))}}
+  .hero p{font-size:1.05rem;margin-bottom:14px;opacity:0.95}
+  .cta-button{background:linear-gradient(45deg,var(--accent1),var(--accent2));border:0;color:white;padding:11px 20px;border-radius:40px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(255,0,0,0.12)}
+  .cta-button:hover{transform:translateY(-3px)}
+
+  /* layout */
+  .grid{display:grid;gap:18px}
+  .grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .card{background:var(--card-bg-dark);padding:16px;border-radius:12px;border:1px solid var(--glass-border-dark);transition:transform .18s,box-shadow .18s}
+  body.light-mode .card{background:var(--card-bg-light);border:1px solid var(--glass-border-light)}
+  .card:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,0.12)}
+
+  label{display:block;margin-bottom:6px;font-weight:600;color:var(--text)}
+  input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)}
+  body.light-mode input, body.light-mode select, body.light-mode textarea{border:1px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.96);color:var(--text)}
+  input::placeholder, textarea::placeholder{opacity:.7}
+  input:focus,select:focus,textarea:focus{outline:none;box-shadow:0 0 0 6px rgba(255,0,0,0.06);border-color:var(--accent1)}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;border-bottom:1px solid rgba(255,0,0,0.06);flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:8px;border:0;background:transparent;cursor:pointer;color:var(--text);transition:all .12s}
+  .tab.active{color:var(--accent1);border-bottom:3px solid var(--accent1);font-weight:700}
+  .btn{background:linear-gradient(45deg,var(--accent1),var(--accent2));border:0;color:white;padding:10px 14px;border-radius:8px;cursor:pointer}
+  .btn-outline{background:transparent;border:1px solid var(--accent1);color:var(--accent1);padding:8px 12px;border-radius:8px;cursor:pointer}
+  .btn:active,.btn-outline:active{transform:translateY(1px)}
+
+  .status{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700}
+  .status.pending{background:rgba(255,193,7,0.12);color:var(--warning);border:1px solid rgba(255,193,7,0.12)}
+  .status.matched{background:rgba(0,123,255,0.08);color:var(--info);border:1px solid rgba(0,123,255,0.12)}
+  .status.executed{background:rgba(40,167,69,0.08);color:var(--success);border:1px solid rgba(40,167,69,0.12)}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left;color:var(--text)}
+  body.light-mode th, body.light-mode td{border-bottom:1px solid rgba(0,0,0,0.06)}
+
+  .chart-placeholder{height:260px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(45deg,rgba(255,0,0,0.04),rgba(255,107,107,0.02))}
+  .notification{position:fixed;top:20px;right:20px;background:linear-gradient(45deg,var(--accent1),var(--accent2));color:#fff;padding:12px 16px;border-radius:8px;box-shadow:0 8px 30px rgba(255,0,0,0.18);transform:translateX(380px);transition:transform 0.28s ease,opacity .28s;opacity:0;z-index:2000}
+  .notification.show{transform:translateX(0);opacity:1}
+  .json-display{background:rgba(0,0,0,0.45);padding:12px;border-radius:8px;border:1px solid rgba(255,0,0,0.06);font-family:monospace;white-space:pre-wrap;overflow:auto;color:var(--text)}
+  .muted{color:rgba(255,255,255,0.75)}
+  body.light-mode .muted{color:var(--muted-light)}
+
+  .copy-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--text);padding:6px 8px;border-radius:6px;font-size:0.85rem;cursor:pointer;margin-left:6px}
+  body.light-mode .copy-btn{border:1px solid rgba(0,0,0,0.08);}
+
+  /* footer */
+  footer.site-footer{margin-top:36px;padding:28px 20px;border-top:1px solid var(--glass-border-dark);display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px;background:transparent}
+  body.light-mode footer.site-footer{border-top:1px solid var(--glass-border-light)}
+  .footer-left{display:flex;gap:12px;align-items:center}
+  .footer-links{display:flex;gap:12px;align-items:center}
+  .footer-links a{color:var(--text);text-decoration:none;font-weight:600;opacity:.95}
+
+  @media (max-width:780px){
+    .nav-links{display:none}
+    .mobile-menu{display:flex}
+    .hero h1{font-size:2rem}
+    .grid-2{grid-template-columns:1fr}
+    footer.site-footer{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <nav class="nav" aria-label="Main navigation">
+        <div class="brand">
+          <!-- YOUR LOGO: preserved exactly as you set it (no edits) -->
+          <img class="logo-img" src="image-removebg-preview (1).png" alt="Anoma logo" id="anomaLogo">
+          <div>
+            <div class="title"><span>Anoma Intent Forge</span></div>
+            <div class="tagline">Declare intents • Auto-match • Simulate execution</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <ul class="nav-links" id="navLinks" role="menubar">
+            <li><a href="javascript:;" onclick="showPage('welcome', this)" class="active" role="menuitem">Home</a></li>
+            <li><a href="javascript:;" onclick="showPage('create', this)" role="menuitem">Create Intent</a></li>
+            <li><a href="javascript:;" onclick="showPage('dashboard', this)" role="menuitem">Dashboard</a></li>
+            <li><a href="javascript:;" onclick="showPage('analytics', this)" role="menuitem">Analytics</a></li>
+            <li><a href="javascript:;" onclick="showPage('about', this)" role="menuitem">About</a></li>
+            <!-- Wallet Connect Button -->
+<button id="connectWalletBtn" class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
+<span id="walletAddress" class="wallet-address"></span>
+
+<style>
+.wallet-btn {
+  padding: 10px 20px;
+  background: linear-gradient(145deg, #ff4b5c, #ff6b81);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.wallet-btn:hover {
+  background: linear-gradient(145deg, #e63946, #ff4757);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+.wallet-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.wallet-address {
+  margin-left: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+</style>
+
+<script>
+let userWallet = null;
+
+async function connectWallet(){
+  if (typeof window.ethereum !== "undefined") {
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      userWallet = accounts[0];
+      updateWalletUI();
+    } catch (err) {
+      console.error("Wallet connection failed:", err);
+      alert("Wallet connection rejected ❌");
+    }
+  } else {
+    alert("MetaMask not detected. Please install it.");
+  }
+}
+
+function updateWalletUI(){
+  const btn = document.getElementById("connectWalletBtn");
+  const walletSpan = document.getElementById("walletAddress");
+  if (userWallet){
+    const shortAddr = userWallet.slice(0,6) + "..." + userWallet.slice(-4);
+    btn.textContent = "Connected";
+    btn.disabled = true;
+    walletSpan.textContent = shortAddr;
+  } else {
+    btn.textContent = "Connect Wallet";
+    btn.disabled = false;
+    walletSpan.textContent = "";
+  }
+}
+</script>
+
+          </ul>
+          <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+          <div class="mobile-menu" onclick="toggleMobileMenu()" title="Open navigation"><span></span><span></span><span></span></div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Welcome -->
+    <section id="welcome" class="page" style="display:block">
+      <div class="hero">
+        <h1><img src="image-removebg-preview (1).png" alt="" style="width:40px;height:40px;vertical-align:middle;margin-right:8px">Anoma Intent Forge</h1>
+        <p>Declare your intent. Let the network find the path — optimized, private, and atomic.</p>
+        <button class="cta-button" onclick="showPage('create', document.querySelector('#navLinks a[onclick*=&quot;create&quot;]'))">Start Creating Intents</button>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:18px">
+        <div class="card">
+          <h2>Intent-Based Trading</h2>
+          <p class="muted">Express what you want — swap tokens, trade NFTs, or transfer assets cross-chain. The matcher finds complementary intents and constructs an optimal execution path.</p>
+        </div>
+        <div class="card">
+          <h2>Smart Matching</h2>
+          <p class="muted">Advanced scoring finds the best counterparties and optimizes routes to reduce fees and slippage — subject to your constraints.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:14px" class="grid grid-2">
+        <div class="card">
+          <h3>How It Works</h3>
+          <ol style="padding-left:18px;margin-top:8px;line-height:1.6">
+            <li>Create intent (swap, NFT, cross-chain)</li>
+            <li>Network discovers matches</li>
+            <li>Simulated atomic execution and optional user approval</li>
+            <li>Settlement & persistent history</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Key Metrics</h3>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px">
+            <div class="card" style="padding:10px;text-align:center">
+              <div style="font-size:20px;font-weight:700" id="totalIntents">0</div>
+              <div class="muted">Total Intents</div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center">
+              <div style="font-size:20px;font-weight:700" id="successRate">95%</div>
+              <div class="muted">Match Success</div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center">
+              <div style="font-size:20px;font-weight:700">$2.4M</div>
+              <div class="muted">Volume</div>
+            </div>
+            <div class="card" style="padding:10px;text-align:center">
+              <div style="font-size:20px;font-weight:700">1,247</div>
+              <div class="muted">Active Users</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Create Intent -->
+    <section id="create" class="page" style="display:none">
+      <h1>Create New Intent</h1>
+      <div class="card" style="margin-top:12px">
+        <div class="tabs" role="tablist" aria-label="Intent types">
+          <button class="tab active" onclick="switchTab('token-swap', this)" data-tab="token-swap" role="tab">Token Swap</button>
+          <button class="tab" onclick="switchTab('nft-trade', this)" data-tab="nft-trade" role="tab">NFT Trade</button>
+          <button class="tab" onclick="switchTab('cross-chain', this)" data-tab="cross-chain" role="tab">Cross-Chain</button>
+        </div>
+
+        <form id="intentForm" onsubmit="createIntent(event)">
+          <div id="token-swap" class="tab-content">
+            <div class="grid grid-2">
+              <div class="form-group">
+                <label for="creatorAddress">Creator Address</label>
+                <input id="creatorAddress" type="text" value="0x742d35Cc6416C810B92b3e4aa31bd64c0FBb7D29" required />
+              </div>
+              <div class="form-group">
+                <label for="action">Action</label>
+                <select id="action" required>
+                  <option value="swap">Instant Swap</option>
+                  <option value="limit-buy">Limit Buy</option>
+                  <option value="limit-sell">Limit Sell</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="fromToken">From Token</label>
+                <select id="fromToken" required><option>ETH</option><option>USDC</option><option>DAI</option><option>WBTC</option></select>
+              </div>
+              <div class="form-group">
+                <label for="toToken">To Token</label>
+                <select id="toToken" required><option>USDC</option><option>ETH</option><option>DAI</option><option>WBTC</option></select>
+              </div>
+              <div class="form-group">
+                <label for="amount">Amount</label>
+                <input id="amount" type="number" step="0.000001" required />
+              </div>
+              <div class="form-group">
+                <label for="priceLimit">Price Limit (Optional)</label>
+                <input id="priceLimit" type="number" step="0.000001" />
+              </div>
+            </div>
+          </div>
+
+          <div id="nft-trade" class="tab-content" style="display:none">
+            <div class="grid grid-2">
+              <div class="form-group">
+                <label for="nftCollection">NFT Collection</label>
+                <select id="nftCollection">
+                  <option value="BAYC">Bored Ape Yacht Club</option>
+                  <option value="CRYPTOPUNKS">CryptoPunks</option>
+                  <option value="AZUKI">Azuki</option>
+                  <option value="DOODLES">Doodles</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="tokenId">Token ID</label>
+                <input id="tokenId" type="number" />
+              </div>
+              <div class="form-group">
+                <label for="desiredToken">Desired Token</label>
+                <select id="desiredToken"><option>ETH</option><option>WETH</option><option>USDC</option></select>
+              </div>
+              <div class="form-group">
+                <label for="minPrice">Minimum Price</label>
+                <input id="minPrice" type="number" step="0.001" />
+              </div>
+            </div>
+          </div>
+
+          <div id="cross-chain" class="tab-content" style="display:none">
+            <div class="grid grid-2">
+              <div class="form-group">
+                <label for="fromChain">From Chain</label>
+                <select id="fromChain"><option value="ethereum">Ethereum</option><option value="polygon">Polygon</option><option value="arbitrum">Arbitrum</option><option value="optimism">Optimism</option></select>
+              </div>
+              <div class="form-group">
+                <label for="toChain">To Chain</label>
+                <select id="toChain"><option value="polygon">Polygon</option><option value="ethereum">Ethereum</option><option value="arbitrum">Arbitrum</option><option value="optimism">Optimism</option></select>
+              </div>
+              <div class="form-group">
+                <label for="transferToken">Token</label>
+                <select id="transferToken"><option>USDC</option><option>ETH</option><option>MATIC</option></select>
+              </div>
+              <div class="form-group">
+                <label for="transferAmount">Amount</label>
+                <input id="transferAmount" type="number" step="0.000001" />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:10px">
+            <div class="form-group">
+              <label for="expiryTime">Expiry Time</label>
+              <input id="expiryTime" type="datetime-local" required />
+            </div>
+            <div class="form-group">
+              <label for="metadata">Metadata (Notes)</label>
+              <textarea id="metadata" rows="3" placeholder="Optional notes about your intent..."></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="btn" type="submit">Create & Sign Intent</button>
+            <button type="button" class="btn-outline" onclick="previewIntent()">Preview Intent</button>
+            <button type="button" class="btn-outline" onclick="copyIntentJSON()">Copy JSON</button>
+          </div>
+        </form>
+
+        <div id="intentPreview" style="display:none;margin-top:12px">
+          <h3>Intent Preview</h3>
+          <div class="json-display" id="jsonDisplay"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="page" style="display:none">
+      <h1>Intents Dashboard</h1>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0">
+        <div class="card" style="text-align:center"><div style="font-weight:700" id="activeIntents">0</div><div class="muted">Active Intents</div></div>
+        <div class="card" style="text-align:center"><div style="font-weight:700" id="matchedIntents">0</div><div class="muted">Matched</div></div>
+        <div class="card" style="text-align:center"><div style="font-weight:700" id="executedIntents">0</div><div class="muted">Executed</div></div>
+        <div class="card" style="text-align:center"><div style="font-weight:700" id="totalValue">$0</div><div class="muted">Total Value</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Your Intents</h2>
+        <div class="table-container" style="overflow:auto">
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Details</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="intentsTable"><tr><td colspan="6" style="text-align:center;padding:20px;opacity:.7">No intents created yet. <a href="javascript:;" onclick="showPage('create',document.querySelector('#navLinks a[onclick*=&quot;create&quot;]'))" style="color:var(--accent2)">Create your first intent</a></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analytics -->
+    <section id="analytics" class="page" style="display:none">
+      <h1>Analytics Dashboard</h1>
+      <div class="grid grid-2" style="margin-top:12px">
+        <div class="card">
+          <h3>Intent Creation Trends</h3>
+          <canvas id="trendChart" style="width:100%;height:260px"></canvas>
+        </div>
+        <div class="card">
+          <h3>Match Status Distribution</h3>
+          <canvas id="statusChart" style="width:100%;height:260px"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Network Activity</h3>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px">
+          <div class="card" style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:700" id="netUsers">1,247</div><div class="muted">Total Users</div></div>
+          <div class="card" style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:700" id="netVolume">$2.4M</div><div class="muted">Volume (24h)</div></div>
+          <div class="card" style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:700" id="netActive">342</div><div class="muted">Active Intents</div></div>
+          <div class="card" style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:700" id="netSuccess">89%</div><div class="muted">Success Rate</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="page" style="display:none">
+      <h1>About Anoma Intent Forge</h1>
+
+      <div class="card">
+        <h2>What is Intent-Based Trading?</h2>
+        <p class="muted">Intent-based trading shifts from specifying how to execute to declaring what you want. Anoma's protocol then locates the optimal route(s) and counterparties to fulfill the user's intent, often spanning multiple chains and markets. That means better prices, less wasted gas, and lower MEV exposure compared to traditional single-path transactions.</p>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:12px">
+        <div class="card">
+          <h3>Why Anoma is Faster & Better vs Traditional Flows</h3>
+          <ul style="line-height:1.6;padding-left:18px">
+            <li><strong>Parallel matching:</strong> multiple potential matches are evaluated in parallel, reducing the time-to-execution.</li>
+            <li><strong>Optimized routing:</strong> the matcher can combine swaps, aggregators and cross-chain hops into a single atomic settlement.</li>
+            <li><strong>Reduced retries:</strong> fewer failed transactions by matching intent constraints off-chain before execution.</li>
+            <li><strong>Privacy layer:</strong> optional privacy preserves user strategy during matching, preventing front-running.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Performance Illustration</h3>
+          <p class="muted">Below chart animates a simplified comparison — Anoma (intent route) vs Traditional (single-path) — showing lower average latency and fewer failed tries.</p>
+          <canvas id="aboutPerfChart" style="width:100%;height:220px"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Get Started</h3>
+        <p class="muted">Create a swap, trade an NFT, or transfer cross-chain. Try the demo intents on the dashboard and watch how matches and executions behave.</p>
+        <div style="margin-top:10px">
+          <button class="btn" onclick="showPage('create', document.querySelector('#navLinks a[onclick*=&quot;create&quot;]'))">Create Your First Intent</button>
+          <button class="btn-outline" onclick="showPage('dashboard', document.querySelector('#navLinks a[onclick*=&quot;dashboard&quot;]'))">View Dashboard</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (visible on all pages) -->
+  <footer class="site-footer">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div class="footer-left">
+        <img src="image-removebg-preview (1).png" alt="logo" style="width:36px;height:36px;border-radius:6px">
+        <div>
+          <div style="font-weight:700">Anoma Intent Forge</div>
+          <div class="muted" style="font-size:0.9rem">Intent-centric dApp prototype — built for the Anoma community</div>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <a href="javascript:;" onclick="showPage('about', document.querySelector('#navLinks a[onclick*=&quot;about&quot;]'))">About</a>
+        <a href="javascript:;" onclick="showPage('analytics', document.querySelector('#navLinks a[onclick*=&quot;analytics&quot;]'))">Analytics</a>
+        <a href="#">Docs</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="notification" class="notification" role="status" aria-live="polite"><span id="notificationText"></span></div>
+
+<script>
+/* ---------- APP STATE ---------- */
+const STORAGE_KEY = 'anoma_intent_forge_v2';
+let intents = [];
+let activeTab = 'token-swap';
+let currentTheme = 'dark';
+let trendChart = null;
+let statusChart = null;
+let perfChart = null;
+
+/* ---------- INIT ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  // load theme
+  const savedTheme = localStorage.getItem('anoma_theme');
+  if (savedTheme === 'light') {
+    currentTheme = 'light';
+    document.body.classList.add('light-mode');
+    document.getElementById('themeToggle').textContent = '☀️';
+  } else {
+    currentTheme = 'dark';
+    document.body.classList.remove('light-mode');
+    document.getElementById('themeToggle').textContent = '🌙';
+  }
+
+  // set expiry default +1 hour
+  const expiryInput = document.getElementById('expiryTime');
+  if (expiryInput) {
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    expiryInput.value = now.toISOString().slice(0,16);
+  }
+
+  loadIntents();
+  renderAll();
+  // initial small chart animations after load
+  setTimeout(()=>{ updateCharts(); initAboutPerfChart(); }, 300);
+});
+
+/* ---------- THEME TOGGLE ---------- */
+function toggleTheme(){
+  const body = document.body;
+  if (currentTheme === 'dark') {
+    currentTheme = 'light';
+    body.classList.add('light-mode');
+    document.getElementById('themeToggle').textContent = '☀️';
+  } else {
+    currentTheme = 'dark';
+    body.classList.remove('light-mode');
+    document.getElementById('themeToggle').textContent = '🌙';
+  }
+  localStorage.setItem('anoma_theme', currentTheme);
+}
+
+/* ---------- PAGE NAV ---------- */
+function showPage(pageId, el){
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  const target = document.getElementById(pageId); if (target) target.style.display = 'block';
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (pageId === 'dashboard') updateDashboard();
+  if (pageId === 'analytics') updateCharts();
+}
+
+/* ---------- TABS ---------- */
+function switchTab(tabId, el){
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  const target = document.getElementById(tabId); if (target) target.style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  activeTab = tabId;
+}
+
+/* ---------- INTENT CREATION ---------- */
+function createIntent(e){
+  e.preventDefault();
+  if (!validateCurrentTab()) { showNotification('Please fill required fields.'); return; }
+  const intent = buildIntentFromForm();
+  intent.id = 'INT_' + Math.random().toString(36).slice(2,9).toUpperCase();
+  intent.status = 'pending';
+  intent.created = new Date().toISOString();
+  intent.signature = generateFakeSignature();
+  intents.unshift(intent);
+  saveIntents();
+  renderAll();
+  showNotification('Intent created! 🎯');
+
+  // simulate matching
+  setTimeout(()=> simulateMatching(intent.id), 1200 + Math.random()*1800);
+  resetForm();
+}
+
+function validateCurrentTab(){
+  if (activeTab === 'token-swap'){ const amt = parseFloat(document.getElementById('amount').value || 0); return amt > 0; }
+  if (activeTab === 'cross-chain'){ const amt = parseFloat(document.getElementById('transferAmount').value || 0); return amt > 0; }
+  return true;
+}
+
+function resetForm(){
+  const metadata = document.getElementById('metadata'); if (metadata) metadata.value = '';
+  if (activeTab === 'token-swap'){ document.getElementById('amount').value = ''; document.getElementById('priceLimit').value = ''; }
+  if (activeTab === 'nft-trade'){ document.getElementById('tokenId').value = ''; document.getElementById('minPrice').value = ''; }
+  if (activeTab === 'cross-chain'){ document.getElementById('transferAmount').value = ''; }
+  const expiryInput = document.getElementById('expiryTime'); if (expiryInput){ const now = new Date(); now.setHours(now.getHours()+1); expiryInput.value = now.toISOString().slice(0,16); }
+  const preview = document.getElementById('intentPreview'); if (preview) preview.style.display = 'none';
+}
+
+function buildIntentFromForm(){
+  const intent = { creator: document.getElementById('creatorAddress').value || 'guest', type: activeTab, metadata: document.getElementById('metadata').value || '', expiry: document.getElementById('expiryTime').value || '' };
+  if (activeTab === 'token-swap'){
+    intent.action = document.getElementById('action').value;
+    intent.fromToken = document.getElementById('fromToken').value;
+    intent.toToken = document.getElementById('toToken').value;
+    intent.amount = parseFloat(document.getElementById('amount').value || 0);
+    intent.priceLimit = document.getElementById('priceLimit').value ? parseFloat(document.getElementById('priceLimit').value) : null;
+    intent.details = `${intent.action.toUpperCase()}: ${intent.amount} ${intent.fromToken} → ${intent.toToken}`;
+  } else if (activeTab === 'nft-trade'){
+    intent.collection = document.getElementById('nftCollection').value;
+    intent.tokenId = document.getElementById('tokenId').value || '';
+    intent.desiredToken = document.getElementById('desiredToken').value;
+    intent.minPrice = document.getElementById('minPrice').value ? parseFloat(document.getElementById('minPrice').value) : null;
+    intent.details = `NFT Trade: ${intent.collection}#${intent.tokenId} → ${intent.minPrice || 'N/A'} ${intent.desiredToken}`;
+  } else {
+    intent.fromChain = document.getElementById('fromChain').value;
+    intent.toChain = document.getElementById('toChain').value;
+    intent.token = document.getElementById('transferToken').value;
+    intent.amount = parseFloat(document.getElementById('transferAmount').value || 0);
+    intent.details = `Cross-chain: ${intent.amount} ${intent.token} from ${intent.fromChain} → ${intent.toChain}`;
+  }
+  return intent;
+}
+
+/* ---------- PREVIEW & COPY ---------- */
+function previewIntent(){ const intent = buildIntentFromForm(); document.getElementById('jsonDisplay').textContent = JSON.stringify(intent, null, 2); document.getElementById('intentPreview').style.display = 'block'; window.scrollTo({top:document.getElementById('intentPreview').offsetTop-40, behavior:'smooth'}); }
+function copyIntentJSON(){ const intent = buildIntentFromForm(); navigator.clipboard.writeText(JSON.stringify(intent,null,2)).then(()=> showNotification('Intent JSON copied 📋')); }
+
+/* ---------- MATCHING & EXECUTION ---------- */
+function simulateMatching(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if (!intent || intent.status !== 'pending') return;
+  intent.status = 'matched';
+  intent.matchedWith = 'INT_' + Math.random().toString(36).slice(2,9).toUpperCase();
+  intent.matchTime = new Date().toISOString();
+  saveIntents(); renderAll(); showNotification(`Intent ${intent.id} matched 🔗`);
+  setTimeout(()=> simulateExecution(intentId), 900 + Math.random()*1200);
+}
+
+function simulateExecution(intentId){
+  const intent = intents.find(i => i.id === intentId);
+  if (!intent || intent.status !== 'matched') return;
+  intent.status = 'executed';
+  intent.executionTime = new Date().toISOString();
+  intent.txHash = '0x' + Array.from({length:64}).map(()=> Math.floor(Math.random()*16).toString(16)).join('');
+  saveIntents(); renderAll(); showNotification(`Intent ${intent.id} executed ✅`);
+}
+
+/* ---------- RENDER & STATS ---------- */
+function renderAll(){ updateDashboard(); updateDashboardStats(); updateWelcomeStats(); updateCharts(); }
+
+function updateDashboard(){
+  const tableBody = document.getElementById('intentsTable');
+  if (!tableBody) return;
+  if (intents.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;opacity:.7">No intents created yet. <a href="javascript:;" onclick="showPage('create',document.querySelector('#navLinks a[onclick*=&quot;create&quot;]'))" style="color:var(--accent2)">Create your first intent</a></td></tr>`;
+    return;
+  }
+  tableBody.innerHTML = intents.map(intent => {
+    const typeLabel = (intent.type || '').replace('-', ' ').toUpperCase();
+    const statusClass = intent.status === 'pending' ? 'pending' : (intent.status === 'matched' ? 'matched' : (intent.status === 'executed' ? 'executed' : ''));
+    const createdAt = intent.created ? new Date(intent.created).toLocaleString() : '-';
+    const txButton = intent.txHash ? `<button class="copy-btn" onclick="copyText('${intent.txHash}')">TX</button>` : '';
+    return `<tr>
+      <td>${intent.id||'-'}</td>
+      <td>${typeLabel}</td>
+      <td style="max-width:360px;white-space:pre-wrap">${escapeHtml(intent.details||'')}</td>
+      <td><span class="status ${statusClass}">${getStatusEmoji(intent.status)} ${(intent.status||'').toUpperCase()}</span></td>
+      <td>${createdAt}</td>
+      <td>
+        <button class="copy-btn" onclick="copyIntentDetails('${intent.id}')">Copy</button>
+        ${txButton}
+      </td>
+    </tr>`;
+  }).join('');
+  updateCharts();
+  updateDashboardStats();
+}
+
+function updateDashboardStats(){
+  const active = intents.filter(i => i.status === 'pending').length;
+  const matched = intents.filter(i => i.status === 'matched').length;
+  const executed = intents.filter(i => i.status === 'executed').length;
+  const totalValue = intents.reduce((sum,it) => {
+    if (it.amount) return sum + Number(it.amount || 0);
+    if (it.minPrice) return sum + Number(it.minPrice || 0);
+    if (it.priceLimit) return sum + Number(it.priceLimit || 0);
+    return sum;
+  }, 0);
+  document.getElementById('activeIntents').textContent = active;
+  document.getElementById('matchedIntents').textContent = matched;
+  document.getElementById('executedIntents').textContent = executed;
+  document.getElementById('totalValue').textContent = `$${totalValue.toFixed(2)}`;
+  document.getElementById('totalIntents').textContent = intents.length;
+}
+
+/* ---------- CHARTS (Chart.js) ---------- */
+function createGradient(ctx, color){
+  const g = ctx.createLinearGradient(0, 0, 0, 260);
+  g.addColorStop(0, hexToRgba(color, 0.35));
+  g.addColorStop(1, hexToRgba(color, 0.05));
+  return g;
+}
+function hexToRgba(hex, a){
+  // hex like #ff6b6b
+  const c = hex.replace('#','');
+  const r = parseInt(c.substring(0,2),16);
+  const g = parseInt(c.substring(2,4),16);
+  const b = parseInt(c.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function updateCharts(){
+  // Prepare data for trendChart (intents per day)
+  const byDay = {};
+  intents.forEach(it => {
+    const d = new Date(it.created || new Date()).toISOString().slice(0,10);
+    byDay[d] = (byDay[d] || 0) + 1;
+  });
+  // last 10 days
+  const days = [];
+  const counts = [];
+  for(let i=9;i>=0;i--){
+    const dt = new Date(); dt.setDate(dt.getDate()-i);
+    const key = dt.toISOString().slice(0,10);
+    days.push(key);
+    counts.push(byDay[key] || 0);
+  }
+
+  const pending = intents.filter(i=>i.status==='pending').length;
+  const matched = intents.filter(i=>i.status==='matched').length;
+  const executed = intents.filter(i=>i.status==='executed').length;
+
+  // trendChart
+  const ctx1 = document.getElementById('trendChart').getContext('2d');
+  if (!trendChart){
+    trendChart = new Chart(ctx1, {
+      type:'line',
+      data:{
+        labels: days,
+        datasets:[{
+          label:'Intents created',
+          data:counts,
+          fill:true,
+          tension:0.35,
+          borderColor:'#ff6b6b',
+          backgroundColor:createGradient(ctx1, '#ff6b6b'),
+          pointRadius:4,
+          pointHoverRadius:6
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false}},y:{beginAtZero:true}}
+      }
+    });
+  } else {
+    trendChart.data.labels = days;
+    trendChart.data.datasets[0].data = counts;
+    trendChart.update();
+  }
+
+  // statusChart
+  const ctx2 = document.getElementById('statusChart').getContext('2d');
+  if (!statusChart){
+    statusChart = new Chart(ctx2, {
+      type:'doughnut',
+      data:{
+        labels:['Pending','Matched','Executed'],
+        datasets:[{
+          data:[pending,matched,executed],
+          backgroundColor:['#ffc107','#007bff','#28a745'],
+          hoverOffset:6
+        }]
+      },
+      options:{responsive:true,plugins:{legend:{position:'bottom'}}}
+    });
+  } else {
+    statusChart.data.datasets[0].data = [pending,matched,executed];
+    statusChart.update();
+  }
+}
+
+/* ---------- ABOUT PERF CHART ---------- */
+function initAboutPerfChart(){
+  const ctx = document.getElementById('aboutPerfChart').getContext('2d');
+  if (perfChart) { perfChart.destroy(); perfChart = null; }
+  // sample latency data (ms) for illustration
+  const labels = ['T-9','T-6','T-3','Now'];
+  const anoma = [150, 130, 110, 95]; // trending lower
+  const traditional = [200,220,210,230];
+  perfChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Anoma (intent route)', data:anoma, backgroundColor:hexToRgba('#ff6b6b',0.9)},
+        {label:'Traditional (single-path)', data:traditional, backgroundColor:hexToRgba('#333',0.8)}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{position:'bottom'}},
+      interaction:{mode:'index',intersect:false},
+      scales:{y:{beginAtZero:true,title:{display:true,text:'Latency (ms)'}}}
+    }
+  });
+}
+
+/* ---------- UTILS ---------- */
+function getStatusEmoji(status){
+  if (status === 'pending') return '⏳';
+  if (status === 'matched') return '🔗';
+  if (status === 'executed') return '✅';
+  return '❓';
+}
+function copyIntentDetails(intentId){ const it = intents.find(i=>i.id===intentId); if(!it) return; navigator.clipboard.writeText(JSON.stringify(it,null,2)).then(()=> showNotification('Intent details copied 📋')); }
+function copyText(txt){ navigator.clipboard.writeText(txt).then(()=> showNotification('Copied 📋')); }
+function showNotification(msg){ const n=document.getElementById('notification'), t=document.getElementById('notificationText'); t.textContent=msg; n.classList.add('show'); setTimeout(()=> n.classList.remove('show'),3000); }
+function generateFakeSignature(){ return '0x' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------- STORAGE ---------- */
+function saveIntents(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(intents)); }catch(e){console.warn('save failed',e);} }
+function loadIntents(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw){
+      intents = JSON.parse(raw);
+      return;
+    }
+  }catch(e){console.warn('load failed',e);}
+  // seed demo intents if none
+  intents = [
+    { id:'INT_DEMO001', creator:'0x742d...', type:'token-swap', action:'swap', fromToken:'ETH', toToken:'USDC', amount:1.5, details:'SWAP: 1.5 ETH → USDC', status:'executed', created:new Date(Date.now()-86400000).toISOString(), signature:generateFakeSignature(), matchedWith:'INT_COUNTER001', txHash:'0x'+Math.random().toString(16).slice(2,66), metadata:'Demo' },
+    { id:'INT_DEMO002', creator:'0x456d...', type:'nft-trade', collection:'BAYC', tokenId:'1337', desiredToken:'ETH', minPrice:25.5, details:'NFT Trade: BAYC#1337 → 25.5 ETH', status:'matched', created:new Date(Date.now()-43200000).toISOString(), signature:generateFakeSignature(), matchedWith:'INT_COUNTER002', metadata:'Demo BAYC' }
+  ];
+  saveIntents();
+}
+
+/* ---------- RENDER STATS ---------- */
+function updateWelcomeStats(){ document.getElementById('totalIntents').textContent = intents.length; }
+
+/* ---------- MOBILE NAV ---------- */
+function toggleMobileMenu(){ const navLinks=document.getElementById('navLinks'); navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex'; }
+
+/* ---------- INITIAL render ---------- */
+function updateDashboard(){ updateDashboardStats(); // update table
+  const tableBody = document.getElementById('intentsTable');
+  if (!tableBody) return;
+  if (intents.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;opacity:.7">No intents created yet. <a href="javascript:;" onclick="showPage('create',document.querySelector('#navLinks a[onclick*=&quot;create&quot;]'))" style="color:var(--accent2)">Create your first intent</a></td></tr>`;
+    return;
+  }
+  tableBody.innerHTML = intents.map(intent => {
+    const typeLabel = (intent.type || '').replace('-', ' ').toUpperCase();
+    const statusClass = intent.status === 'pending' ? 'pending' : (intent.status === 'matched' ? 'matched' : (intent.status === 'executed' ? 'executed' : ''));
+    const createdAt = intent.created ? new Date(intent.created).toLocaleString() : '-';
+    const txButton = intent.txHash ? `<button class="copy-btn" onclick="copyText('${intent.txHash}')">TX</button>` : '';
+    return `<tr>
+      <td>${intent.id||'-'}</td>
+      <td>${typeLabel}</td>
+      <td style="max-width:360px;white-space:pre-wrap">${escapeHtml(intent.details||'')}</td>
+      <td><span class="status ${statusClass}">${getStatusEmoji(intent.status)} ${(intent.status||'').toUpperCase()}</span></td>
+      <td>${createdAt}</td>
+      <td>
+        <button class="copy-btn" onclick="copyIntentDetails('${intent.id}')">Copy</button>
+        ${txButton}
+      </td>
+    </tr>`;
+  }).join('');
+  updateCharts();
+  updateDashboardStats();
+}
+
+/* execute initial chart update once */
+setTimeout(()=>{ updateCharts(); initAboutPerfChart(); }, 600);
+
+</script>
+</body>
+</html>
