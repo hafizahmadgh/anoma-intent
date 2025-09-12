@@ -148,11 +148,10 @@
             <li><a href="javascript:;" onclick="showPage('analytics', this)" role="menuitem">Analytics</a></li>
             <li><a href="javascript:;" onclick="showPage('about', this)" role="menuitem">About</a></li>
             <!-- Wallet Connect Button -->
-<button id="connectWalletBtn" class="wallet-btn" onclick="connectWallet()">Connect Wallet</button>
-<span id="walletAddress" class="wallet-address"></span>
+<button id="walletButton" class="walletButton">Connect Wallet</button>
 
 <style>
-.wallet-btn {
+.walletButton {
   padding: 10px 20px;
   background: linear-gradient(145deg, #ff4b5c, #ff6b81);
   color: #fff;
@@ -164,30 +163,57 @@
   transition: all 0.25s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-.wallet-btn:hover {
+.walletButton:hover {
   background: linear-gradient(145deg, #e63946, #ff4757);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
-.wallet-btn:disabled {
+.walletButton:disabled {
   background: #aaa;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
-.wallet-address {
-  margin-left: 12px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
+
+/* Confirmation notification */
+#walletConfirm {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff4b5c;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+#walletConfirm button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background: #fff;
+  color: #ff4b5c;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
 
+<div id="walletConfirm">
+  Do you want to disconnect the wallet?
+  <button id="confirmYes">Yes</button>
+  <button id="confirmNo">No</button>
+</div>
+
 <script>
 const walletButton = document.getElementById('walletButton');
+const walletConfirm = document.getElementById('walletConfirm');
+const confirmYes = document.getElementById('confirmYes');
+const confirmNo = document.getElementById('confirmNo');
+
 let userAddress = null;
 
-// Function to format address (optional)
+// Shorten wallet address
 function shortenAddress(address) {
   return address.slice(0, 6) + '...' + address.slice(-4);
 }
@@ -207,10 +233,20 @@ async function connectWallet() {
   }
 }
 
-// Disconnect wallet (reset)
+// Disconnect wallet
 function disconnectWallet() {
   userAddress = null;
   walletButton.textContent = "Connect Wallet";
+}
+
+// Show disconnect confirmation
+function showDisconnectConfirm() {
+  walletConfirm.style.display = "block";
+}
+
+// Hide confirmation
+function hideDisconnectConfirm() {
+  walletConfirm.style.display = "none";
 }
 
 // Button click logic
@@ -218,8 +254,18 @@ walletButton.addEventListener('click', () => {
   if (!userAddress) {
     connectWallet();
   } else {
-    disconnectWallet();
+    showDisconnectConfirm();
   }
+});
+
+// Confirm buttons
+confirmYes.addEventListener('click', () => {
+  disconnectWallet();
+  hideDisconnectConfirm();
+});
+
+confirmNo.addEventListener('click', () => {
+  hideDisconnectConfirm();
 });
 </script>
 
