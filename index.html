@@ -184,37 +184,43 @@
 </style>
 
 <script>
-let userWallet = null;
+const walletButton = document.getElementById('walletButton');
+let userAddress = null;
 
-async function connectWallet(){
-  if (typeof window.ethereum !== "undefined") {
+// Function to format address (optional)
+function shortenAddress(address) {
+  return address.slice(0, 6) + '...' + address.slice(-4);
+}
+
+// Connect wallet
+async function connectWallet() {
+  if (window.ethereum) {
     try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      userWallet = accounts[0];
-      updateWalletUI();
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      userAddress = accounts[0];
+      walletButton.textContent = shortenAddress(userAddress);
     } catch (err) {
-      console.error("Wallet connection failed:", err);
-      alert("Wallet connection rejected ❌");
+      console.error("User rejected connection:", err);
     }
   } else {
-    alert("MetaMask not detected. Please install it.");
+    alert("Please install MetaMask!");
   }
 }
 
-function updateWalletUI(){
-  const btn = document.getElementById("connectWalletBtn");
-  const walletSpan = document.getElementById("walletAddress");
-  if (userWallet){
-    const shortAddr = userWallet.slice(0,6) + "..." + userWallet.slice(-4);
-    btn.textContent = "Connected";
-    btn.disabled = true;
-    walletSpan.textContent = shortAddr;
-  } else {
-    btn.textContent = "Connect Wallet";
-    btn.disabled = false;
-    walletSpan.textContent = "";
-  }
+// Disconnect wallet (reset)
+function disconnectWallet() {
+  userAddress = null;
+  walletButton.textContent = "Connect Wallet";
 }
+
+// Button click logic
+walletButton.addEventListener('click', () => {
+  if (!userAddress) {
+    connectWallet();
+  } else {
+    disconnectWallet();
+  }
+});
 </script>
 
           </ul>
